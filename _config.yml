@@ -1,0 +1,29 @@
+# Dependencies
+markdown:            redcarpet
+highlighter:         pygments
+
+# Permalinks
+#
+# Use of `relative_permalinks` ensures post links from the index work properly.
+permalink:           pretty
+relative_permalinks: true
+
+# Setup
+title:               Francois Weber
+tagline:             'Engineer'
+description:         'Fullstack engineer living in Barcelona.'
+url:                 http://webarbeit.github.io
+baseurl:             /
+paginate:            5
+
+# About/contact
+author:
+  name:              Francois Weber
+  url:               https://twitter.com/mdo
+  email:             f.weberdev@gmail.com
+
+# Custom vars
+version:             1.0.0
+
+github:
+  url: https://github.com/webarbeit
