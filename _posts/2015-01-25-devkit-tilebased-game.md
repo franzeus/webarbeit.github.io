@@ -165,5 +165,3 @@ this.moveTo = function(point) {
 Of course this is just the very basic setup for a tile-based game.
 The next steps would be to create a `FloorTile`, `WallTile`, `PlayerTile` and have a factory method to add them in the `addTiles()` method pending on the number in the 2D-Array.
 
-When a user taps on a certain tile, the player should go there and ,after arriving, something should be triggered.
-
