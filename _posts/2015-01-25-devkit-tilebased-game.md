@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Devkit and Easystar - How to build a tile-based game
+description: Tutorial, learn how to build a tile based game in devkit gameclosure
 ---
 
 <div class="message">
