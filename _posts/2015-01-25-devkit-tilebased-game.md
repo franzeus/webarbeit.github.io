@@ -30,9 +30,9 @@ The easiest way to get an overview about the files is to explore the [github rep
 However, in our `/src` folder we have:
 
 * `Application.js` - To setup the game and views
+* `/views/GameView.js` - "The world" which contains all the tile-views
 * `/models/Tile.js` - Basic tile object (`ui.View`)
 * `/models/MoveTile.js` - Extends Tile.js, can change its position
-* `/views/GameView.js` - "The world" which contains all the tile-views
 
 ## Generate the tiles - GameView.js
 
@@ -40,7 +40,7 @@ The GameView.js is a `ui.View` and covers the entire screen. It is the parent ("
 
 ### First there was a 2D-Array
 
-So basically we define our world (columns and rows) in a 2D-Array, process this array and add views to the GameView.
+So basically we define our world (columns and rows) in a 2D-Array, process the array and add child-views to the GameView.
 
 <img src="/public/posts/devkit_uml.png" class="image_responsive">
 
@@ -71,7 +71,8 @@ The size of one tile is set in `TILE_SIZE` to 50 pixel. This means that each ele
 
 <div class="message message_info">
 <h4>Why 50px?</h4>
-The recommended size of an element, on which user on a mobile device should be able to tap on is 44px. Or rather: also people with bigger fingers should be able to play this game ;)
+<i>An MIT Touch Lab study of Human Fingertips to investigate the Mechanics of Tactile Sense found that the average width of the index finger is 1.6 to 2 cm (16 – 20 mm) for most adults. This converts to 45 – 57 pixels, [...]</i>
+<a href="http://www.smashingmagazine.com/2012/02/21/finger-friendly-design-ideal-mobile-touchscreen-target-sizes/">Smashingmagazine</a>
 </div>
 
 To create the Tile-Views we iterate over the 2D-Array, create `new Tile()` objects and push them to the GameView child-views with `this.addSubview(tile)`.
@@ -117,31 +118,48 @@ this.speed = 40;
 this.move_queue = [];
 ```
 
-When a user taps on a Floor-tile, the player should move there by using a pathfinding algorithm.
+When a user taps on a Floor-tile, the player should move there by using a pathfinding algorithm (we will use [Easystar](http://www.easystarjs.com/)).
 Thats why we use a queue data structure to store all the tiles the moving-tile has to visit.
 
 <img src="/public/posts/devkit_queue.png" class="image_responsive">
 
-To add the player tile to the GameView we simply call the ``addPlayer()`` method. This should happen after we build the map, so that the player-tile is in front and not hidden behind a floor or wall tile.
+To add the player tile to the GameView we simply create a `new MoveTile()` and again add it with `this.addSubview()` to the parent GameView. Notice: the position of the player is still hard coded and the best practice would of course be to have it already in our `map` 2D-array.
 
+```javascript
+// GameView.js
+this.addPlayer = function() {
+  player = new MoveTile({
+    col: 2, // start col
+    row: 2, // start row
+    x: TILE_SIZE * 2,
+    y: TILE_SIZE * 2,
+    width: TILE_SIZE,
+    height: TILE_SIZE
+  });
+  this.addSubview(player);
+  this.setActiveTile(player);
+  // ...
+```
+
+This should happen after we build the map, so that the player-tile is in front and not hidden behind a floor or wall tile.
 
 ## Move player-tile to a tile
 
-When a user taps on a Floor-tile, the following will happen:
+When we parsed our map in `this.addTiles()` and added our tiles, we also binded a `'Tile:tapped'` event to each tile. The following will happen, when a user taps on a Floor-tile:
 
 1. Tap on a Floor-Tile
 2. `Tile::tapped` event is triggered
 3. `GameView::moveTileTo(source, target)` gets called
-4. Easystar magic and calculating the path
-5. Setting path of player tile `MoveTile::setQueue()`
-6. Start working up the move queue of the player tile
+4. "Easystar magic" and calculating the `path`
+5. Setting queue of player tile `MoveTile::setQueue(path)`
+6. Start working up the `move_queue` of the player tile
 
 <div class="message message_warning">
-  <h4>What about the collosion detection?</h4>
+  <h4>What about the collision detection?</h4>
   This is what Easystar already does for us. We can define that a 1 is a wall and not walkable. So Easystar will calculate the path and avoid all walls etc and return us the correct path we need.
 </div>
 
-So in the end the `MoveTile::moveTo` gets called and we animate the player-tile view with the build-in `animator` method:
+So for each element in the `move_queue` the `MoveTile::moveTo()` method gets called and we animate the player-tile view with the build-in `animator` method:
 
 ```javascript
 // @param {Object} Point - x, y coordinates to go to
@@ -165,4 +183,6 @@ this.moveTo = function(point) {
 
 Of course this is just the very basic setup for a tile-based game.
 The next steps would be to create a `FloorTile`, `WallTile`, `PlayerTile` and have a factory method to add them in the `addTiles()` method pending on the number in the 2D-Array.
+
+We also didn't update the map when the player moves. Which is also important when we have more moving tiles and want Easystar to correctly calculate the path.
 
